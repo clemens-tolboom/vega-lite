@@ -3,6 +3,7 @@
  */
 import {Axis as VgAxis, AxisOrient, TitleConfig} from 'vega';
 import {isArray} from 'vega-util';
+import {FacetChannel} from '../../channel';
 import {Config} from '../../config';
 import {vgField} from '../../fielddef';
 import {
@@ -70,7 +71,7 @@ export function getHeaderType(orient: AxisOrient) {
   return 'footer';
 }
 
-export function getTitleGroup(model: Model, channel: HeaderChannel) {
+export function getTitleGroup(model: Model, channel: FacetChannel) {
   const title = model.component.layoutHeaders[channel].title;
   const config = model.config ? model.config : undefined;
   const facetFieldDef = model.component.layoutHeaders[channel].facetFieldDef
@@ -80,7 +81,7 @@ export function getTitleGroup(model: Model, channel: HeaderChannel) {
   return {
     name: `${channel}-title`,
     type: 'group',
-    role: `${channel}-title`,
+    role: `${channel === 'facet' ? 'column' : channel}-title`,
     title: {
       text: title,
       offset: 10,

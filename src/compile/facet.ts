@@ -1,4 +1,4 @@
-import {AggregateOp, LayoutAlign, NewSignal} from 'vega';
+import {AggregateOp, LayoutAlign, NewSignal, Title} from 'vega';
 import {isArray} from 'vega-util';
 import {Channel, COLUMN, FACET_CHANNELS, FacetChannel, ROW, ScaleChannel} from '../channel';
 import {Config} from '../config';
@@ -13,6 +13,7 @@ import {contains, flatten} from '../util';
 import {isVgRangeStep, VgData, VgLayout, VgMarkGroup} from '../vega.schema';
 import {assembleAxis} from './axis/assemble';
 import {buildModel} from './buildmodel';
+import {formatSignalRef} from './common';
 import {assembleFacetData} from './data/assemble';
 import {sortArrayIndexField} from './data/calculate';
 import {parseData} from './data/parse';
@@ -130,14 +131,15 @@ export class FacetModel extends ModelWithField {
   public parseAxisAndHeader() {
     this.child.parseAxisAndHeader();
 
-    this.parseHeader('column');
-    this.parseHeader('row');
+    for (const channel of FACET_CHANNELS) {
+      this.parseHeader(channel);
+    }
 
     this.mergeChildAxis('x');
     this.mergeChildAxis('y');
   }
 
-  private parseHeader(channel: HeaderChannel) {
+  private parseHeader(channel: FacetChannel) {
     if (this.channelHasField(channel)) {
       const fieldDef = this.facet[channel];
       let title = fieldDefTitle(fieldDef, this.config, {allowDisabling: true});
@@ -152,7 +154,7 @@ export class FacetModel extends ModelWithField {
         title,
         facetFieldDef: fieldDef,
         // TODO: support adding label to footer as well
-        header: [this.makeHeaderComponent(channel, true)]
+        header: channel === 'facet' ? [] : [this.makeHeaderComponent(channel, true)]
       };
     }
   }
@@ -415,6 +417,24 @@ export class FacetModel extends ModelWithField {
     return [];
   }
 
+  private assembleLabelTitle(): Title {
+    const {facet} = this;
+    if (facet.facet) {
+      // TODO: consolidate this with the getHeaderGroup() method
+
+      const {header = {}} = facet.facet;
+      const {format} = header;
+
+      return {
+        text: formatSignalRef(facet.facet, format, 'parent', this.config),
+        offset: 10,
+        frame: 'group',
+        style: 'guide-label'
+      };
+    }
+    return undefined;
+  }
+
   public assembleMarks(): VgMarkGroup[] {
     const {child} = this;
 
@@ -425,7 +445,7 @@ export class FacetModel extends ModelWithField {
 
     const encodeEntry = child.assembleGroupEncodeEntry(false);
 
-    const title = child.assembleTitle();
+    const title = this.assembleLabelTitle() || child.assembleTitle();
     const style = child.assembleGroupStyle();
 
     const markGroup = {
