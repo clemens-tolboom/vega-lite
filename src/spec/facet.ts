@@ -2,7 +2,7 @@ import {ChannelDef, Field, FieldDef, TypedFieldDef} from '../fielddef';
 import {Header} from '../header';
 import {Resolve} from '../resolve';
 import {EncodingSortField, SortArray, SortOrder} from '../sort';
-import {BaseSpec, GenericCompositionLayout} from './base';
+import {BaseSpec, ColumnsMixins, GenericCompositionLayout} from './base';
 import {FacetMapping} from './facet';
 import {GenericLayerSpec, NormalizedLayerSpec} from './layer';
 import {GenericUnitSpec, NormalizedUnitSpec} from './unit';
@@ -33,6 +33,8 @@ export interface FacetFieldDef<F extends Field> extends TypedFieldDef<F> {
   sort?: SortArray | SortOrder | EncodingSortField<F> | null;
 }
 
+export type FacetFieldDefWithColumns<F extends Field> = FacetFieldDef<F> & ColumnsMixins;
+
 export interface FacetMapping<F extends Field> {
   /**
    * Vertical facets for trellis plots.
@@ -57,7 +59,7 @@ export interface EncodingFacetMapping<F extends Field> extends FacetMapping<F> {
    * Faceted field for trellis plots.
    * If either `row` or `column` is specified, this channel will be ignored.
    */
-  facet?: FacetFieldDef<F>;
+  facet?: FacetFieldDefWithColumns<F>;
 }
 
 export function isFacetFieldDef<F extends Field>(channelDef: ChannelDef<FieldDef<F>>): channelDef is FacetFieldDef<F> {

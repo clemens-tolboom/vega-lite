@@ -50,7 +50,7 @@ describe('normalize()', () => {
           data: {url: 'data/movies.json'},
           mark: 'point',
           encoding: {
-            [channel]: fieldDef,
+            [channel]: {...fieldDef, ...(channel === 'facet' ? {columns: 3} : {})},
             x: {field: 'Worldwide_Gross', type: 'quantitative'},
             y: {field: 'US_DVD_Sales', type: 'quantitative'}
           }
@@ -69,6 +69,7 @@ describe('normalize()', () => {
           description: 'faceted spec',
           data: {url: 'data/movies.json'},
           facet: expectedFacet,
+          ...(channel === 'facet' ? {columns: 3} : {}),
           spec: {
             mark: 'point',
             width: 123,

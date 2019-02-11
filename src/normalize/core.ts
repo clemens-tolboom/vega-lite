@@ -98,26 +98,37 @@ export class CoreNormalizer extends SpecMapper<NormalizerParams, FacetedExtended
   private mapFacetedUnit(spec: FacetedExtendedUnitSpec, params: NormalizerParams): NormalizedFacetSpec {
     // New encoding in the inside spec should not contain row / column
     // as row/column should be moved to facet
-    const {row, column, facet, ...encoding} = spec.encoding;
+    const {row, column, facet: originalFacetDef, ...encoding} = spec.encoding;
+
+    let facetColumnsMixins;
+
+    if (row || column) {
+      // row / column has higher precedence than facet
+      facetColumnsMixins = {
+        facet: {
+          ...(row ? {row} : {}),
+          ...(column ? {column} : {})
+        }
+      };
+
+      if (originalFacetDef) {
+        log.warn(log.message.facetChannelDropped([...(row ? [ROW] : []), ...(column ? [COLUMN] : [])]));
+      }
+    } else {
+      const {columns, ...normalizedFacetDef} = originalFacetDef;
+      facetColumnsMixins = {
+        facet: normalizedFacetDef,
+        ...(columns ? {columns} : {})
+      };
+    }
 
     // Mark and encoding should be moved into the inner spec
     const {mark, width, projection, height, selection, encoding: _, ...outerSpec} = spec;
 
-    if (facet && (row || column)) {
-      log.warn(log.message.facetChannelDropped([...(row ? [ROW] : []), ...(column ? [COLUMN] : [])]));
-    }
-
     return {
       ...outerSpec,
 
-      // row / column has higher precedence than facet
-      facet:
-        row || column
-          ? {
-              ...(row ? {row} : {}),
-              ...(column ? {column} : {})
-            }
-          : facet,
+      ...facetColumnsMixins,
       spec: this.mapUnit(
         {
           ...(projection ? {projection} : {}),

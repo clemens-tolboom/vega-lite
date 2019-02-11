@@ -181,12 +181,14 @@ export interface GenericCompositionLayout extends BoundsMixins {
   spacing?: number | RowCol<number>;
 }
 
-export interface GenericCompositionLayoutWithColumns extends GenericCompositionLayout {
+export interface ColumnsMixins {
   /**
    * The number of columns to include in the view composition layout. If unspecified, an infinite number of columns (a single row) will be assumed.
    */
   columns?: number;
 }
+
+export type GenericCompositionLayoutWithColumns = GenericCompositionLayout & ColumnsMixins;
 
 const COMPOSITION_LAYOUT_INDEX: Flag<keyof GenericCompositionLayoutWithColumns> = {
   align: 1,
