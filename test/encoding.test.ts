@@ -105,20 +105,14 @@ describe('encoding', () => {
         defaultConfig
       );
 
-      expect(output.encoding).toEqual({
-        x: {
-          field: 'a',
-          type: 'quantitative'
+      expect(output.encoding.y).toEqual({
+        axis: {
+          format: '%Y',
+          formatType: 'time'
         },
-        y: {
-          axis: {
-            format: '%Y',
-            formatType: 'time'
-          },
-          field: 'year_b',
-          title: 'b (year)',
-          type: 'ordinal'
-        }
+        field: 'year_b',
+        title: 'b (year)',
+        type: 'ordinal'
       });
     });
     it('should produce format and formatType in legend when there is timeUnit', () => {
@@ -134,24 +128,46 @@ describe('encoding', () => {
         defaultConfig
       );
 
-      expect(output.encoding).toEqual({
-        x: {
-          field: 'a',
-          type: 'quantitative'
+      expect(output.encoding.detail).toEqual({
+        legend: {
+          format: '%b',
+          formatType: 'time'
         },
-        y: {
-          field: 'b',
-          type: 'ordinal'
-        },
-        detail: {
-          legend: {
-            format: '%b',
-            formatType: 'time'
+        field: 'month_c',
+        title: 'c (month)',
+        type: 'nominal'
+      });
+    });
+    it('should produce format and formatType in legend when there is timeUnit in tooltip channel or tooltip channel', () => {
+      const output = extractTransformsFromEncoding(
+        normalizeEncoding(
+          {
+            x: {field: 'a', type: 'quantitative'},
+            y: {field: 'b', type: 'ordinal'},
+            tooltip: {field: 'c', timeUnit: 'month', type: 'nominal'},
+            text: {field: 'c', timeUnit: 'month', type: 'nominal'}
           },
-          field: 'month_c',
-          title: 'c (month)',
-          type: 'nominal'
-        }
+          'text'
+        ),
+        defaultConfig
+      );
+      expect(output.encoding.tooltip).toEqual({
+        legend: {
+          format: '%b',
+          formatType: 'time'
+        },
+        field: 'month_c',
+        title: 'c (month)',
+        type: 'nominal'
+      });
+      expect(output.encoding.text).toEqual({
+        legend: {
+          format: '%b',
+          formatType: 'time'
+        },
+        field: 'month_c',
+        title: 'c (month)',
+        type: 'nominal'
       });
     });
     it('should extract aggregates from encoding', () => {
